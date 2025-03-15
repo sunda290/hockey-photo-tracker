@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Photo Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background: #007BFF;
+            color: white;
+        }
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+        }
+        .btn {
+            margin-top: 10px;
+            padding: 10px;
+            font-size: 16px;
+            background: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background: #218838;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Game Photo Tracker</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Arena</th>
+                <th>Home Team</th>
+                <th>Visitor Team</th>
+                <th>Photo Taken</th>
+            </tr>
+        </thead>
+        <tbody id="gameTable">
+            <!-- Rows will be dynamically inserted here -->
+        </tbody>
+    </table>
+
+    <button class="btn" onclick="exportCSV()">Export CSV</button>
+
+    <script>
+        // Sample data based on the schedule
+        const games = [
+            { date: "Mar 14, 2025", time: "5:00 PM", arena: "Paul Dossey Blue", home: "Brock Wild", visitor: "Markham Waxers" },
+            { date: "Mar 14, 2025", time: "6:00 PM", arena: "Paul Dossey Blue", home: "Beeton Stingers", visitor: "Woodville Hurricanes" },
+            { date: "Mar 14, 2025", time: "7:00 PM", arena: "Paul Dossey Blue", home: "Etobicoke Bulldogs Blue", visitor: "Bradford Bulldogs" },
+            { date: "Mar 14, 2025", time: "8:00 PM", arena: "Paul Dossey Blue", home: "Bradford Bulldogs 2", visitor: "Sturgeon Thunder Grey" }
+        ];
+
+        function loadGames() {
+            const table = document.getElementById("gameTable");
+            table.innerHTML = ""; 
+
+            games.forEach((game, index) => {
+                const row = table.insertRow();
+                row.innerHTML = `
+                    <td>${game.date}</td>
+                    <td>${game.time}</td>
+                    <td>${game.arena}</td>
+                    <td>${game.home}</td>
+                    <td>${game.visitor}</td>
+                    <td>
+                        <input type="checkbox" id="photo-${index}" onchange="saveProgress()">
+                    </td>
+                `;
+            });
+
+            // Load saved progress
+            loadProgress();
+        }
+
+        function saveProgress() {
+            const checkboxes = document.querySelectorAll("input[type='checkbox']");
+            const progress = Array.from(checkboxes).map(cb => cb.checked);
+            localStorage.setItem("photoProgress", JSON.stringify(progress));
+        }
+
+        function loadProgress() {
+            const savedProgress = JSON.parse(localStorage.getItem("photoProgress"));
+            if (savedProgress) {
+                const checkboxes = document.querySelectorAll("input[type='checkbox']");
+                checkboxes.forEach((cb, index) => {
+                    cb.checked = savedProgress[index];
+                });
+            }
+        }
+
+        function exportCSV() {
+            let csvContent = "Date,Time,Arena,Home Team,Visitor Team,Photo Taken\n";
+            const rows = document.querySelectorAll("#gameTable tr");
+
+            rows.forEach(row => {
+                const cells = row.querySelectorAll("td");
+                if (cells.length > 0) {
+                    const date = cells[0].textContent;
+                    const time = cells[1].textContent;
+                    const arena = cells[2].textContent;
+                    const home = cells[3].textContent;
+                    const visitor = cells[4].textContent;
+                    const photoTaken = cells[5].querySelector("input").checked ? "Yes" : "No";
+
+                    csvContent += `${date},${time},${arena},${home},${visitor},${photoTaken}\n`;
+                }
+            });
+
+            const blob = new Blob([csvContent], { type: "text/csv" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "photo_tracker.csv";
+            link.click();
+        }
+
+        // Load table on page load
+        window.onload = loadGames;
+    </script>
+
+</body>
+</html>
