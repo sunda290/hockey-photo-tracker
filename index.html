@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Photo Tracker</title>
+    <title>Hockey Photo Tracker</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -25,27 +25,29 @@
             background: #007BFF;
             color: white;
         }
-        input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
+        .photographed {
+            background-color: #c3e6cb;
         }
-        .btn {
-            margin-top: 10px;
+        .teams-container {
+            margin-top: 20px;
             padding: 10px;
-            font-size: 16px;
-            background: #28a745;
-            color: white;
-            border: none;
-            cursor: pointer;
+            background: white;
+            border-radius: 5px;
         }
-        .btn:hover {
-            background: #218838;
+        .team-photographed {
+            font-weight: bold;
+        }
+        .photo-categories {
+            display: flex;
+            gap: 10px;
         }
     </style>
 </head>
 <body>
 
-    <h2>Game Photo Tracker</h2>
+    <h2>Hockey Photo Tracker</h2>
+
+    <!-- Tabela de Jogos -->
     <table>
         <thead>
             <tr>
@@ -54,128 +56,160 @@
                 <th>Arena</th>
                 <th>Home Team</th>
                 <th>Visitor Team</th>
-                <th>Photo Taken</th>
+                <th>Team Photo</th>
+                <th>Player Action</th>
+                <th>Social Media</th>
             </tr>
         </thead>
-        <tbody id="gameTable">
-            <!-- Rows will be dynamically inserted here -->
-        </tbody>
+        <tbody id="gameTable"></tbody>
     </table>
 
-    <button class="btn" onclick="exportCSV()">Export CSV</button>
+    <!-- Lista de Times Fotografados -->
+    <div class="teams-container">
+        <h3>Teams Photographed</h3>
+        <ul id="teamList"></ul>
+    </div>
 
     <script>
-        // Sample data based on the schedule
         const games = [
-    { date: "Mar 14, 2025", time: "5:00 PM", arena: "Paul Dossey Blue", home: "Brock Wild", visitor: "Markham Waxers" },
-    { date: "Mar 14, 2025", time: "6:00 PM", arena: "Paul Dossey Blue", home: "Beeton Stingers", visitor: "Woodville Hurricanes" },
-    { date: "Mar 14, 2025", time: "7:00 PM", arena: "Paul Dossey Blue", home: "Etobicoke Bulldogs Blue", visitor: "Bradford Bulldogs" },
-    { date: "Mar 14, 2025", time: "8:00 PM", arena: "Paul Dossey Blue", home: "Bradford Bulldogs 2", visitor: "Sturgeon Thunder Grey" },
-    { date: "Mar 14, 2025", time: "5:00 PM", arena: "Centre Ice 1", home: "North Bay Trappers", visitor: "Millbrook Stars" },
-    { date: "Mar 14, 2025", time: "6:00 PM", arena: "Centre Ice 1", home: "Innisfil Winterhawks 1", visitor: "Port Colborne Sailors" },
-    { date: "Mar 14, 2025", time: "7:00 PM", arena: "Centre Ice 1", home: "Caledon Hawks", visitor: "Talbot Trailblazers" },
-    { date: "Mar 14, 2025", time: "8:00 PM", arena: "Centre Ice 1", home: "Tillsonburg LL2", visitor: "Nickel Centre Blast" },
-    { date: "Mar 14, 2025", time: "4:30 PM", arena: "Centre Ice 2", home: "Kirkland Lake", visitor: "Forest Hill Force Select Gold" },
-    { date: "Mar 14, 2025", time: "5:30 PM", arena: "Centre Ice 2", home: "Ingersoll 2", visitor: "Millbrook Stars" },
-    { date: "Mar 14, 2025", time: "6:30 PM", arena: "Centre Ice 2", home: "Lefroy Icebreakers 2", visitor: "Wainfleet Wild" },
-    { date: "Mar 14, 2025", time: "7:30 PM", arena: "Centre Ice 2", home: "Fort Erie Jr Meteors", visitor: "Kirkland Lake" },
-    { date: "Mar 14, 2025", time: "8:30 PM", arena: "Centre Ice 2", home: "Tillsonburg Tornadoes LL3", visitor: "Valley East Atom Flyers" },
+            { date: "Mar 14, 2025", time: "5:00 PM", arena: "Paul Dossey Blue", home: "Brock Wild", visitor: "Markham Waxers" },
+            { date: "Mar 14, 2025", time: "6:00 PM", arena: "Paul Dossey Blue", home: "Beeton Stingers", visitor: "Woodville Hurricanes" },
+            { date: "Mar 14, 2025", time: "7:00 PM", arena: "Paul Dossey Blue", home: "Etobicoke Bulldogs Blue", visitor: "Bradford Bulldogs" },
+            { date: "Mar 14, 2025", time: "8:00 PM", arena: "Paul Dossey Blue", home: "Bradford Bulldogs 2", visitor: "Sturgeon Thunder Grey" },
+            { date: "Mar 14, 2025", time: "5:00 PM", arena: "Centre Ice 1", home: "North Bay Trappers", visitor: "Millbrook Stars" },
+            { date: "Mar 14, 2025", time: "6:00 PM", arena: "Centre Ice 1", home: "Innisfil Winterhawks 1", visitor: "Port Colborne Sailors" },
+            { date: "Mar 14, 2025", time: "7:00 PM", arena: "Centre Ice 1", home: "Caledon Hawks", visitor: "Talbot Trailblazers" },
+            { date: "Mar 14, 2025", time: "8:00 PM", arena: "Centre Ice 1", home: "Tillsonburg LL2", visitor: "Nickel Centre Blast" },
+            { date: "Mar 14, 2025", time: "4:30 PM", arena: "Centre Ice 2", home: "Kirkland Lake", visitor: "Forest Hill Force Select Gold" },
+            { date: "Mar 14, 2025", time: "5:30 PM", arena: "Centre Ice 2", home: "Ingersoll 2", visitor: "Millbrook Stars" },
+            { date: "Mar 14, 2025", time: "6:30 PM", arena: "Centre Ice 2", home: "Lefroy Icebreakers 2", visitor: "Wainfleet Wild" },
+            { date: "Mar 14, 2025", time: "7:30 PM", arena: "Centre Ice 2", home: "Fort Erie Jr Meteors", visitor: "Kirkland Lake" },
+            { date: "Mar 14, 2025", time: "8:30 PM", arena: "Centre Ice 2", home: "Tillsonburg Tornadoes LL3", visitor: "Valley East Atom Flyers" },
+            { date: "Mar 15, 2025", time: "8:00 AM", arena: "Paul Dossey Blue", home: "Millbrook Stars", visitor: "Lefroy Icebreakers 2" },
+            { date: "Mar 15, 2025", time: "9:00 AM", arena: "Paul Dossey Blue", home: "Port Colborne Sailors", visitor: "Beeton Stingers" },
+            { date: "Mar 15, 2025", time: "10:00 AM", arena: "Paul Dossey Blue", home: "Bradford Bulldogs", visitor: "Caledon Hawks" },
+            { date: "Mar 15, 2025", time: "11:00 AM", arena: "Paul Dossey Blue", home: "Valley East Atom Flyers", visitor: "Bradford Bulldogs 2" },
+            { date: "Mar 15, 2025", time: "12:00 PM", arena: "Paul Dossey Blue", home: "Brock Wild", visitor: "Kirkland Lake" },
+            { date: "Mar 15, 2025", time: "1:00 PM", arena: "Paul Dossey Blue", home: "Bradford Bulldogs", visitor: "Talbot Trailblazers" },
+            { date: "Mar 15, 2025", time: "8:00 AM", arena: "Centre Ice 1", home: "Forest Hill Force Select Gold", visitor: "Brock Wild" },
+            { date: "Mar 15, 2025", time: "9:00 AM", arena: "Centre Ice 1", home: "Woodville Hurricanes", visitor: "Ingersoll 2" },
+            { date: "Mar 15, 2025", time: "10:00 AM", arena: "Centre Ice 1", home: "Markham Waxers", visitor: "North Bay Trappers" },
+            { date: "Mar 15, 2025", time: "11:00 AM", arena: "Centre Ice 1", home: "Nickel Centre Blast", visitor: "Tillsonburg Tornadoes LL3" },
+            { date: "Mar 15, 2025", time: "12:00 PM", arena: "Centre Ice 1", home: "Innisfil Winterhawks 1", visitor: "Millbrook Stars" },
+            { date: "Mar 15, 2025", time: "8:30 AM", arena: "Centre Ice 2", home: "Wainfleet Wild", visitor: "Innisfil Winterhawks 1" },
+            { date: "Mar 15, 2025", time: "9:30 AM", arena: "Centre Ice 2", home: "Talbot Trailblazers", visitor: "Etobicoke Bulldogs Blue" },
+            { date: "Mar 15, 2025", time: "10:30 AM", arena: "Centre Ice 2", home: "Millbrook Stars", visitor: "Fort Erie Jr Meteors" },
+            { date: "Mar 15, 2025", time: "11:30 AM", arena: "Centre Ice 2", home: "Sturgeon Thunder Grey", visitor: "Tillsonburg LL2" },
+        ];
     
-    { date: "Mar 15, 2025", time: "8:00 AM", arena: "Paul Dossey Blue", home: "Millbrook Stars", visitor: "Lefroy Icebreakers 2" },
-    { date: "Mar 15, 2025", time: "9:00 AM", arena: "Paul Dossey Blue", home: "Port Colborne Sailors", visitor: "Beeton Stingers" },
-    { date: "Mar 15, 2025", time: "10:00 AM", arena: "Paul Dossey Blue", home: "Bradford Bulldogs", visitor: "Caledon Hawks" },
-    { date: "Mar 15, 2025", time: "11:00 AM", arena: "Paul Dossey Blue", home: "Valley East Atom Flyers", visitor: "Bradford Bulldogs 2" },
-    { date: "Mar 15, 2025", time: "12:00 PM", arena: "Paul Dossey Blue", home: "Brock Wild", visitor: "Kirkland Lake" },
-    { date: "Mar 15, 2025", time: "1:00 PM", arena: "Paul Dossey Blue", home: "Bradford Bulldogs", visitor: "Talbot Trailblazers" },
-
-    { date: "Mar 15, 2025", time: "8:00 AM", arena: "Centre Ice 1", home: "Forest Hill Force Select Gold", visitor: "Brock Wild" },
-    { date: "Mar 15, 2025", time: "9:00 AM", arena: "Centre Ice 1", home: "Woodville Hurricanes", visitor: "Ingersoll 2" },
-    { date: "Mar 15, 2025", time: "10:00 AM", arena: "Centre Ice 1", home: "Markham Waxers", visitor: "North Bay Trappers" },
-    { date: "Mar 15, 2025", time: "11:00 AM", arena: "Centre Ice 1", home: "Nickel Centre Blast", visitor: "Tillsonburg Tornadoes LL3" },
-    { date: "Mar 15, 2025", time: "12:00 PM", arena: "Centre Ice 1", home: "Innisfil Winterhawks 1", visitor: "Millbrook Stars" },
-    
-    { date: "Mar 15, 2025", time: "8:30 AM", arena: "Centre Ice 2", home: "Wainfleet Wild", visitor: "Innisfil Winterhawks 1" },
-    { date: "Mar 15, 2025", time: "9:30 AM", arena: "Centre Ice 2", home: "Talbot Trailblazers", visitor: "Etobicoke Bulldogs Blue" },
-    { date: "Mar 15, 2025", time: "10:30 AM", arena: "Centre Ice 2", home: "Millbrook Stars", visitor: "Fort Erie Jr Meteors" },
-    { date: "Mar 15, 2025", time: "11:30 AM", arena: "Centre Ice 2", home: "Sturgeon Thunder Grey", visitor: "Tillsonburg LL2" },
-    
-    { date: "Mar 16, 2025", time: "8:00 AM", arena: "Paul Dossey Blue", home: "Second Place", visitor: "Third Place" },
-    { date: "Mar 16, 2025", time: "9:05 AM", arena: "Paul Dossey Blue", home: "Fourth Place", visitor: "Third Place" },
-    { date: "Mar 16, 2025", time: "10:10 AM", arena: "Paul Dossey Blue", home: "Second Place", visitor: "First Place" },
-    { date: "Mar 16, 2025", time: "11:15 AM", arena: "Paul Dossey Blue", home: "Winner Semi 1", visitor: "Winner Semi 2" },
-
-    { date: "Mar 16, 2025", time: "11:00 AM", arena: "Centre Ice 1", home: "First Place", visitor: "Fourth Place" },
-    { date: "Mar 16, 2025", time: "12:05 PM", arena: "Centre Ice 1", home: "Second Place", visitor: "Winner Semi 1" },
-    { date: "Mar 16, 2025", time: "1:50 PM", arena: "Centre Ice 1", home: "Final", visitor: "Winner Semi 2" }
-];
-
-
         function loadGames() {
-            const table = document.getElementById("gameTable");
-            table.innerHTML = ""; 
+        const table = document.getElementById("gameTable");
+        table.innerHTML = "";
 
-            games.forEach((game, index) => {
-                const row = table.insertRow();
-                row.innerHTML = `
-                    <td>${game.date}</td>
-                    <td>${game.time}</td>
-                    <td>${game.arena}</td>
-                    <td>${game.home}</td>
-                    <td>${game.visitor}</td>
-                    <td>
-                        <input type="checkbox" id="photo-${index}" onchange="saveProgress()">
-                    </td>
-                `;
-            });
+        games.forEach((game) => {
+            const row = table.insertRow();
+            row.innerHTML = `
+                <td>${game.date}</td>
+                <td>${game.time}</td>
+                <td>${game.arena}</td>
+                <td>${game.home}</td>
+                <td>${game.visitor}</td>
+                <td><input type="checkbox" id="photo-team-${game.date}-${game.home}" onchange="markPhotographed('${game.date}','${game.home}')">
+                    <input type="checkbox" id="photo-team-${game.date}-${game.visitor}" onchange="markPhotographed('${game.date}','${game.visitor}')"></td>
+                <td><input type="checkbox" id="photo-action-${game.date}-${game.home}" onchange="markPhotographed('${game.date}','${game.home}')">
+                    <input type="checkbox" id="photo-action-${game.date}-${game.visitor}" onchange="markPhotographed('${game.date}','${game.visitor}')"></td>
+                <td><input type="checkbox" id="photo-social-${game.date}-${game.home}" onchange="markPhotographed('${game.date}','${game.home}')">
+                    <input type="checkbox" id="photo-social-${game.date}-${game.visitor}" onchange="markPhotographed('${game.date}','${game.visitor}')"></td>
+            `;
+        });
 
-            // Load saved progress
-            loadProgress();
-        }
+        loadProgress();
+    }
 
-        function saveProgress() {
-            const checkboxes = document.querySelectorAll("input[type='checkbox']");
-            const progress = Array.from(checkboxes).map(cb => cb.checked);
-            localStorage.setItem("photoProgress", JSON.stringify(progress));
-        }
+    function markPhotographed(date, team) {
+        const categories = ["team", "action", "social"];
+        let isPhotographed = false;
+        let photoData = {};
 
-        function loadProgress() {
-            const savedProgress = JSON.parse(localStorage.getItem("photoProgress"));
-            if (savedProgress) {
-                const checkboxes = document.querySelectorAll("input[type='checkbox']");
-                checkboxes.forEach((cb, index) => {
-                    cb.checked = savedProgress[index];
-                });
+        categories.forEach(category => {
+            let checkbox = document.getElementById(`photo-${category}-${date}-${team}`);
+            if (checkbox && checkbox.checked) {
+                isPhotographed = true;
+                photoData[category] = true;
+            } else {
+                photoData[category] = false;
             }
-        }
+        });
 
-        function exportCSV() {
-            let csvContent = "Date,Time,Arena,Home Team,Visitor Team,Photo Taken\n";
-            const rows = document.querySelectorAll("#gameTable tr");
+        saveProgress();
+        updateTeamList();
+    }
 
-            rows.forEach(row => {
-                const cells = row.querySelectorAll("td");
-                if (cells.length > 0) {
-                    const date = cells[0].textContent;
-                    const time = cells[1].textContent;
-                    const arena = cells[2].textContent;
-                    const home = cells[3].textContent;
-                    const visitor = cells[4].textContent;
-                    const photoTaken = cells[5].querySelector("input").checked ? "Yes" : "No";
+    function updateTeamList() {
+        let teamList = document.getElementById("teamList");
+        teamList.innerHTML = "";
 
-                    csvContent += `${date},${time},${arena},${home},${visitor},${photoTaken}\n`;
+        let savedProgress = JSON.parse(localStorage.getItem("photoProgress"));
+        if (!savedProgress) return;
+
+        Object.keys(savedProgress).forEach(key => {
+            let [date, team] = key.split("|");
+            let teamData = savedProgress[key];
+
+            if (Object.values(teamData).some(val => val)) {
+                let listItem = document.createElement("li");
+                listItem.id = `team-${team}`;
+                listItem.innerHTML = `
+                    <span class="team-photographed">${team} (${date}):</span> 
+                    <span style="color:${teamData.team ? 'green' : 'white'}">Team Photo</span> | 
+                    <span style="color:${teamData.action ? 'green' : 'white'}">Player Action</span> | 
+                    <span style="color:${teamData.social ? 'green' : 'white'}">Social Media</span>
+                `;
+                teamList.appendChild(listItem);
+            }
+        });
+    }
+
+    function saveProgress() {
+        let progress = JSON.parse(localStorage.getItem("photoProgress")) || {}; // Carregar progresso salvo
+
+        games.forEach(game => {
+            ["home", "visitor"].forEach(teamType => {
+                const team = game[teamType];
+                const key = `${game.date}|${team}`; // Criamos uma chave única baseada na data e no time
+
+                if (!progress[key]) {
+                    progress[key] = { team: false, action: false, social: false };
                 }
+
+                progress[key].team = document.getElementById(`photo-team-${game.date}-${team}`).checked;
+                progress[key].action = document.getElementById(`photo-action-${game.date}-${team}`).checked;
+                progress[key].social = document.getElementById(`photo-social-${game.date}-${team}`).checked;
             });
+        });
 
-            const blob = new Blob([csvContent], { type: "text/csv" });
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.download = "photo_tracker.csv";
-            link.click();
+        localStorage.setItem("photoProgress", JSON.stringify(progress));
+    }
+
+    function loadProgress() {
+        let savedProgress = JSON.parse(localStorage.getItem("photoProgress"));
+        if (savedProgress) {
+            Object.keys(savedProgress).forEach(key => {
+                let [date, team] = key.split("|");
+                Object.keys(savedProgress[key]).forEach(type => {
+                    let checkbox = document.getElementById(`photo-${type}-${date}-${team}`);
+                    if (checkbox) {
+                        checkbox.checked = savedProgress[key][type];
+                    }
+                });
+            });
         }
+        updateTeamList();
+    }
 
-        // Load table on page load
-        window.onload = loadGames;
-    </script>
+    window.onload = loadGames;
+</script>
+    
 
 </body>
 </html>
