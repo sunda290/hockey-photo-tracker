@@ -7,14 +7,15 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
-            padding: 20px;
+            margin: 10px;
+            padding: 10px;
             background-color: #f4f4f4;
         }
         table {
             width: 100%;
             border-collapse: collapse;
             background: white;
+            margin-bottom: 20px;
         }
         th, td {
             border: 1px solid #ddd;
@@ -25,21 +26,40 @@
             background: #007BFF;
             color: white;
         }
-        .photographed {
-            background-color: #c3e6cb;
-        }
-        .teams-container {
-            margin-top: 20px;
+        .team-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             padding: 10px;
-            background: white;
+        }
+        .btn-group {
+            display: flex;
+            gap: 5px;
+            margin-top: 5px;
+        }
+        .photo-btn {
+            border: none;
+            padding: 10px;
+            font-size: 14px;
+            cursor: pointer;
+            width: 100px;
+            text-align: center;
+            font-weight: bold;
+            transition: background 0.3s ease;
             border-radius: 5px;
         }
-        .team-photographed {
-            font-weight: bold;
-        }
-        .photo-categories {
-            display: flex;
-            gap: 10px;
+        .btn-default { background: #ccc; color: black; }
+        .btn-team { background: #28a745; color: white; }
+        .btn-action { background: #ffc107; color: black; }
+        .btn-social { background: #007bff; color: white; }
+
+        /* Responsividade */
+        @media screen and (max-width: 768px) {
+            .photo-btn {
+                width: 80px;
+                font-size: 12px;
+                padding: 8px;
+            }
         }
     </style>
 </head>
@@ -47,7 +67,7 @@
 
     <h2>Hockey Photo Tracker</h2>
 
-    <!-- Tabela de Jogos -->
+    <!-- Tabela principal de jogos -->
     <table>
         <thead>
             <tr>
@@ -56,19 +76,24 @@
                 <th>Arena</th>
                 <th>Home Team</th>
                 <th>Visitor Team</th>
-                <th>Team Photo</th>
-                <th>Player Action</th>
-                <th>Social Media</th>
             </tr>
         </thead>
         <tbody id="gameTable"></tbody>
     </table>
 
-    <!-- Lista de Times Fotografados -->
-    <div class="teams-container">
-        <h3>Teams Photographed</h3>
-        <ul id="teamList"></ul>
-    </div>
+    <!-- Tabela de controle de fotos -->
+    <h3>Photo Status by Team</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Team</th>
+                <th>Team Photo</th>
+                <th>Player Action</th>
+                <th>Social Media</th>
+            </tr>
+        </thead>
+        <tbody id="teamStatusTable"></tbody>
+    </table>
 
     <script>
         const games = [
@@ -85,131 +110,143 @@
             { date: "Mar 14, 2025", time: "6:30 PM", arena: "Centre Ice 2", home: "Lefroy Icebreakers 2", visitor: "Wainfleet Wild" },
             { date: "Mar 14, 2025", time: "7:30 PM", arena: "Centre Ice 2", home: "Fort Erie Jr Meteors", visitor: "Kirkland Lake" },
             { date: "Mar 14, 2025", time: "8:30 PM", arena: "Centre Ice 2", home: "Tillsonburg Tornadoes LL3", visitor: "Valley East Atom Flyers" },
+
             { date: "Mar 15, 2025", time: "8:00 AM", arena: "Paul Dossey Blue", home: "Millbrook Stars", visitor: "Lefroy Icebreakers 2" },
             { date: "Mar 15, 2025", time: "9:00 AM", arena: "Paul Dossey Blue", home: "Port Colborne Sailors", visitor: "Beeton Stingers" },
             { date: "Mar 15, 2025", time: "10:00 AM", arena: "Paul Dossey Blue", home: "Bradford Bulldogs", visitor: "Caledon Hawks" },
             { date: "Mar 15, 2025", time: "11:00 AM", arena: "Paul Dossey Blue", home: "Valley East Atom Flyers", visitor: "Bradford Bulldogs 2" },
             { date: "Mar 15, 2025", time: "12:00 PM", arena: "Paul Dossey Blue", home: "Brock Wild", visitor: "Kirkland Lake" },
             { date: "Mar 15, 2025", time: "1:00 PM", arena: "Paul Dossey Blue", home: "Bradford Bulldogs", visitor: "Talbot Trailblazers" },
+
             { date: "Mar 15, 2025", time: "8:00 AM", arena: "Centre Ice 1", home: "Forest Hill Force Select Gold", visitor: "Brock Wild" },
             { date: "Mar 15, 2025", time: "9:00 AM", arena: "Centre Ice 1", home: "Woodville Hurricanes", visitor: "Ingersoll 2" },
             { date: "Mar 15, 2025", time: "10:00 AM", arena: "Centre Ice 1", home: "Markham Waxers", visitor: "North Bay Trappers" },
             { date: "Mar 15, 2025", time: "11:00 AM", arena: "Centre Ice 1", home: "Nickel Centre Blast", visitor: "Tillsonburg Tornadoes LL3" },
             { date: "Mar 15, 2025", time: "12:00 PM", arena: "Centre Ice 1", home: "Innisfil Winterhawks 1", visitor: "Millbrook Stars" },
+
             { date: "Mar 15, 2025", time: "8:30 AM", arena: "Centre Ice 2", home: "Wainfleet Wild", visitor: "Innisfil Winterhawks 1" },
             { date: "Mar 15, 2025", time: "9:30 AM", arena: "Centre Ice 2", home: "Talbot Trailblazers", visitor: "Etobicoke Bulldogs Blue" },
             { date: "Mar 15, 2025", time: "10:30 AM", arena: "Centre Ice 2", home: "Millbrook Stars", visitor: "Fort Erie Jr Meteors" },
             { date: "Mar 15, 2025", time: "11:30 AM", arena: "Centre Ice 2", home: "Sturgeon Thunder Grey", visitor: "Tillsonburg LL2" },
         ];
-    
+
+        let teamsSet = new Set(); // Para armazenar os times únicos
+
         function loadGames() {
-        const table = document.getElementById("gameTable");
-        table.innerHTML = "";
+            const table = document.getElementById("gameTable");
+            table.innerHTML = "";
 
-        games.forEach((game) => {
-            const row = table.insertRow();
-            row.innerHTML = `
-                <td>${game.date}</td>
-                <td>${game.time}</td>
-                <td>${game.arena}</td>
-                <td>${game.home}</td>
-                <td>${game.visitor}</td>
-                <td><input type="checkbox" id="photo-team-${game.date}-${game.home}" onchange="markPhotographed('${game.date}','${game.home}')">
-                    <input type="checkbox" id="photo-team-${game.date}-${game.visitor}" onchange="markPhotographed('${game.date}','${game.visitor}')"></td>
-                <td><input type="checkbox" id="photo-action-${game.date}-${game.home}" onchange="markPhotographed('${game.date}','${game.home}')">
-                    <input type="checkbox" id="photo-action-${game.date}-${game.visitor}" onchange="markPhotographed('${game.date}','${game.visitor}')"></td>
-                <td><input type="checkbox" id="photo-social-${game.date}-${game.home}" onchange="markPhotographed('${game.date}','${game.home}')">
-                    <input type="checkbox" id="photo-social-${game.date}-${game.visitor}" onchange="markPhotographed('${game.date}','${game.visitor}')"></td>
-            `;
-        });
+            games.forEach((game) => {
+                const row = table.insertRow();
 
-        loadProgress();
-    }
+                row.insertCell(0).textContent = game.date;
+                row.insertCell(1).textContent = game.time;
+                row.insertCell(2).textContent = game.arena;
 
-    function markPhotographed(date, team) {
-        const categories = ["team", "action", "social"];
-        let isPhotographed = false;
-        let photoData = {};
+                const homeCell = row.insertCell(3);
+                homeCell.innerHTML = createTeamSection(game.home, game.date);
+                teamsSet.add(game.home);
 
-        categories.forEach(category => {
-            let checkbox = document.getElementById(`photo-${category}-${date}-${team}`);
-            if (checkbox && checkbox.checked) {
-                isPhotographed = true;
-                photoData[category] = true;
-            } else {
-                photoData[category] = false;
-            }
-        });
-
-        saveProgress();
-        updateTeamList();
-    }
-
-    function updateTeamList() {
-        let teamList = document.getElementById("teamList");
-        teamList.innerHTML = "";
-
-        let savedProgress = JSON.parse(localStorage.getItem("photoProgress"));
-        if (!savedProgress) return;
-
-        Object.keys(savedProgress).forEach(key => {
-            let [date, team] = key.split("|");
-            let teamData = savedProgress[key];
-
-            if (Object.values(teamData).some(val => val)) {
-                let listItem = document.createElement("li");
-                listItem.id = `team-${team}`;
-                listItem.innerHTML = `
-                    <span class="team-photographed">${team} (${date}):</span> 
-                    <span style="color:${teamData.team ? 'green' : 'white'}">Team Photo</span> | 
-                    <span style="color:${teamData.action ? 'green' : 'white'}">Player Action</span> | 
-                    <span style="color:${teamData.social ? 'green' : 'white'}">Social Media</span>
-                `;
-                teamList.appendChild(listItem);
-            }
-        });
-    }
-
-    function saveProgress() {
-        let progress = JSON.parse(localStorage.getItem("photoProgress")) || {}; // Carregar progresso salvo
-
-        games.forEach(game => {
-            ["home", "visitor"].forEach(teamType => {
-                const team = game[teamType];
-                const key = `${game.date}|${team}`; // Criamos uma chave única baseada na data e no time
-
-                if (!progress[key]) {
-                    progress[key] = { team: false, action: false, social: false };
-                }
-
-                progress[key].team = document.getElementById(`photo-team-${game.date}-${team}`).checked;
-                progress[key].action = document.getElementById(`photo-action-${game.date}-${team}`).checked;
-                progress[key].social = document.getElementById(`photo-social-${game.date}-${team}`).checked;
+                const visitorCell = row.insertCell(4);
+                visitorCell.innerHTML = createTeamSection(game.visitor, game.date);
+                teamsSet.add(game.visitor);
             });
-        });
 
-        localStorage.setItem("photoProgress", JSON.stringify(progress));
-    }
+            loadProgress();
+            loadTeamStatus();
+        }
 
-    function loadProgress() {
-        let savedProgress = JSON.parse(localStorage.getItem("photoProgress"));
-        if (savedProgress) {
-            Object.keys(savedProgress).forEach(key => {
-                let [date, team] = key.split("|");
-                Object.keys(savedProgress[key]).forEach(type => {
-                    let checkbox = document.getElementById(`photo-${type}-${date}-${team}`);
-                    if (checkbox) {
-                        checkbox.checked = savedProgress[key][type];
-                    }
+        function createTeamSection(team, date) {
+            return `
+                <div class="team-container">
+                    <strong>${team}</strong>
+                    <div class="btn-group">
+                        <button class="photo-btn btn-default" id="btn-team-${date}-${team}" onclick="togglePhoto('${date}', '${team}', 'team')">Team 📸</button>
+                        <button class="photo-btn btn-default" id="btn-action-${date}-${team}" onclick="togglePhoto('${date}', '${team}', 'action')">Action 🎯</button>
+                        <button class="photo-btn btn-default" id="btn-social-${date}-${team}" onclick="togglePhoto('${date}', '${team}', 'social')">Social 🌐</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function togglePhoto(date, team, type) {
+            const button = document.getElementById(`btn-${type}-${date}-${team}`);
+            let isActive = button.classList.contains(`btn-${type}`);
+
+            if (isActive) {
+                button.classList.remove(`btn-${type}`);
+                button.classList.add("btn-default");
+            } else {
+                button.classList.remove("btn-default");
+                button.classList.add(`btn-${type}`);
+            }
+
+            saveProgress();
+            loadTeamStatus();
+        }
+
+        function saveProgress() {
+            let progress = {};
+            games.forEach(game => {
+                ["home", "visitor"].forEach(teamType => {
+                    const team = game[teamType];
+                    const key = `${game.date}|${team}`;
+
+                    progress[key] = {
+                        team: document.getElementById(`btn-team-${game.date}-${team}`).classList.contains("btn-team"),
+                        action: document.getElementById(`btn-action-${game.date}-${team}`).classList.contains("btn-action"),
+                        social: document.getElementById(`btn-social-${game.date}-${team}`).classList.contains("btn-social")
+                    };
+                });
+            });
+
+            localStorage.setItem("photoProgress", JSON.stringify(progress));
+        }
+
+        function loadProgress() {
+            let savedProgress = JSON.parse(localStorage.getItem("photoProgress"));
+            if (savedProgress) {
+                Object.keys(savedProgress).forEach(key => {
+                    let [date, team] = key.split("|");
+                    Object.keys(savedProgress[key]).forEach(type => {
+                        let button = document.getElementById(`btn-${type}-${date}-${team}`);
+                        if (button) {
+                            button.classList.remove("btn-default", "btn-team", "btn-action", "btn-social");
+                            if (savedProgress[key][type]) {
+                                button.classList.add(`btn-${type}`);
+                            } else {
+                                button.classList.add("btn-default");
+                            }
+                        }
+                    });
+                });
+            }
+            loadTeamStatus();
+        }
+
+        function loadTeamStatus() {
+            const teamStatusTable = document.getElementById("teamStatusTable");
+            teamStatusTable.innerHTML = "";
+
+            let savedProgress = JSON.parse(localStorage.getItem("photoProgress")) || {};
+
+            teamsSet.forEach(team => {
+                let row = teamStatusTable.insertRow();
+                row.insertCell(0).textContent = team;
+
+                ["team", "action", "social"].forEach(type => {
+                    let cell = row.insertCell();
+                    let found = Object.keys(savedProgress).some(key => key.includes(team) && savedProgress[key][type]);
+
+                    cell.style.backgroundColor = found ? (type === "team" ? "#28a745" : type === "action" ? "#ffc107" : "#007bff") : "#ccc";
+                    cell.style.color = "white";
+                    cell.textContent = found ? "✔" : "✖";
                 });
             });
         }
-        updateTeamList();
-    }
 
-    window.onload = loadGames;
-</script>
-    
+        window.onload = loadGames;
+    </script>
 
 </body>
 </html>
