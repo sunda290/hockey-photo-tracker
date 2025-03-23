@@ -97,38 +97,25 @@
 
     <script>
         const games = [
-            { date: "Mar 14, 2025", time: "5:00 PM", arena: "Paul Dossey Blue", home: "Brock Wild", visitor: "Markham Waxers" },
-            { date: "Mar 14, 2025", time: "6:00 PM", arena: "Paul Dossey Blue", home: "Beeton Stingers", visitor: "Woodville Hurricanes" },
-            { date: "Mar 14, 2025", time: "7:00 PM", arena: "Paul Dossey Blue", home: "Etobicoke Bulldogs Blue", visitor: "Bradford Bulldogs" },
-            { date: "Mar 14, 2025", time: "8:00 PM", arena: "Paul Dossey Blue", home: "Bradford Bulldogs 2", visitor: "Sturgeon Thunder Grey" },
-            { date: "Mar 14, 2025", time: "5:00 PM", arena: "Centre Ice 1", home: "North Bay Trappers", visitor: "Millbrook Stars" },
-            { date: "Mar 14, 2025", time: "6:00 PM", arena: "Centre Ice 1", home: "Innisfil Winterhawks 1", visitor: "Port Colborne Sailors" },
-            { date: "Mar 14, 2025", time: "7:00 PM", arena: "Centre Ice 1", home: "Caledon Hawks", visitor: "Talbot Trailblazers" },
-            { date: "Mar 14, 2025", time: "8:00 PM", arena: "Centre Ice 1", home: "Tillsonburg LL2", visitor: "Nickel Centre Blast" },
-            { date: "Mar 14, 2025", time: "4:30 PM", arena: "Centre Ice 2", home: "Kirkland Lake", visitor: "Forest Hill Force Select Gold" },
-            { date: "Mar 14, 2025", time: "5:30 PM", arena: "Centre Ice 2", home: "Ingersoll 2", visitor: "Millbrook Stars" },
-            { date: "Mar 14, 2025", time: "6:30 PM", arena: "Centre Ice 2", home: "Lefroy Icebreakers 2", visitor: "Wainfleet Wild" },
-            { date: "Mar 14, 2025", time: "7:30 PM", arena: "Centre Ice 2", home: "Fort Erie Jr Meteors", visitor: "Kirkland Lake" },
-            { date: "Mar 14, 2025", time: "8:30 PM", arena: "Centre Ice 2", home: "Tillsonburg Tornadoes LL3", visitor: "Valley East Atom Flyers" },
+            { date: "Apr 11, 2025", time: "1:00 PM", arena: "Pro Rink", home: "Wags Hockey", visitor: "Alcohooligans" },
+            { date: "Apr 11, 2025", time: "2:05 PM", arena: "Pro Rink", home: "St. George Old Lions", visitor: "RABC" },
+            { date: "Apr 11, 2025", time: "3:10 PM", arena: "Pro Rink", home: "Shit Shooters", visitor: "Orangemen" },
+            { date: "Apr 11, 2025", time: "4:15 PM", arena: "Pro Rink", home: "All Pucked Up 40", visitor: "FireKrakers 40" },
+            { date: "Apr 11, 2025", time: "5:20 PM", arena: "Pro Rink", home: "Wheat Kings", visitor: "Reapers" },
 
-            { date: "Mar 15, 2025", time: "8:00 AM", arena: "Paul Dossey Blue", home: "Millbrook Stars", visitor: "Lefroy Icebreakers 2" },
-            { date: "Mar 15, 2025", time: "9:00 AM", arena: "Paul Dossey Blue", home: "Port Colborne Sailors", visitor: "Beeton Stingers" },
-            { date: "Mar 15, 2025", time: "10:00 AM", arena: "Paul Dossey Blue", home: "Bradford Bulldogs", visitor: "Caledon Hawks" },
-            { date: "Mar 15, 2025", time: "11:00 AM", arena: "Paul Dossey Blue", home: "Valley East Atom Flyers", visitor: "Bradford Bulldogs 2" },
-            { date: "Mar 15, 2025", time: "12:00 PM", arena: "Paul Dossey Blue", home: "Brock Wild", visitor: "Kirkland Lake" },
-            { date: "Mar 15, 2025", time: "1:00 PM", arena: "Paul Dossey Blue", home: "Bradford Bulldogs", visitor: "Talbot Trailblazers" },
+            { date: "Apr 12, 2025", time: "9:00 AM", arena: "Pro Rink", home: "RABC", visitor: "All Pucked Up 40" },
+            { date: "Apr 12, 2025", time: "10:05 AM", arena: "Pro Rink", home: "FireKrakers 40", visitor: "Shit Shooters" },
+            { date: "Apr 12, 2025", time: "11:10 AM", arena: "Pro Rink", home: "Orangemen", visitor: "St. George Old Lions" },
+            { date: "Apr 12, 2025", time: "12:00 PM", arena: "Lightning Rink", home: "Alcohooligans", visitor: "Wheat Kings" },
+            { date: "Apr 12, 2025", time: "12:15 PM", arena: "Pro Rink", home: "Reapers", visitor: "Wags Hockey" },
+            { date: "Apr 12, 2025", time: "1:05 PM", arena: "Lightning Rink", home: "Shit Shooters", visitor: "RABC" },
+            { date: "Apr 12, 2025", time: "2:20 PM", arena: "Pro Rink", home: "St. George Old Lions", visitor: "FireKrakers 40" },
+            { date: "Apr 12, 2025", time: "3:10 PM", arena: "Lightning Rink", home: "All Pucked Up 40", visitor: "Orangemen" },
+            { date: "Apr 12, 2025", time: "3:25 PM", arena: "Pro Rink", home: "Alcohooligans", visitor: "Reapers" },
+            { date: "Apr 12, 2025", time: "4:15 PM", arena: "Lightning Rink", home: "Wags Hockey", visitor: "Wheat Kings" },
 
-            { date: "Mar 15, 2025", time: "8:00 AM", arena: "Centre Ice 1", home: "Forest Hill Force Select Gold", visitor: "Brock Wild" },
-            { date: "Mar 15, 2025", time: "9:00 AM", arena: "Centre Ice 1", home: "Woodville Hurricanes", visitor: "Ingersoll 2" },
-            { date: "Mar 15, 2025", time: "10:00 AM", arena: "Centre Ice 1", home: "Markham Waxers", visitor: "North Bay Trappers" },
-            { date: "Mar 15, 2025", time: "11:00 AM", arena: "Centre Ice 1", home: "Nickel Centre Blast", visitor: "Tillsonburg Tornadoes LL3" },
-            { date: "Mar 15, 2025", time: "12:00 PM", arena: "Centre Ice 1", home: "Innisfil Winterhawks 1", visitor: "Millbrook Stars" },
-
-            { date: "Mar 15, 2025", time: "8:30 AM", arena: "Centre Ice 2", home: "Wainfleet Wild", visitor: "Innisfil Winterhawks 1" },
-            { date: "Mar 15, 2025", time: "9:30 AM", arena: "Centre Ice 2", home: "Talbot Trailblazers", visitor: "Etobicoke Bulldogs Blue" },
-            { date: "Mar 15, 2025", time: "10:30 AM", arena: "Centre Ice 2", home: "Millbrook Stars", visitor: "Fort Erie Jr Meteors" },
-            { date: "Mar 15, 2025", time: "11:30 AM", arena: "Centre Ice 2", home: "Sturgeon Thunder Grey", visitor: "Tillsonburg LL2" },
         ];
+
 
         let teamsSet = new Set(); // Para armazenar os times únicos
 
