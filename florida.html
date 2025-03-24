@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hockey Photo Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 10px;
+            padding: 10px;
+            background-color: #f4f4f4;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background: #007BFF;
+            color: white;
+        }
+        .team-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+        }
+        .btn-group {
+            display: flex;
+            gap: 5px;
+            margin-top: 5px;
+        }
+        .photo-btn {
+            border: none;
+            padding: 10px;
+            font-size: 14px;
+            cursor: pointer;
+            width: 100px;
+            text-align: center;
+            font-weight: bold;
+            transition: background 0.3s ease;
+            border-radius: 5px;
+        }
+        .btn-default { background: #ccc; color: black; }
+        .btn-team { background: #28a745; color: white; }
+        .btn-action { background: #ffc107; color: black; }
+        .btn-social { background: #007bff; color: white; }
+
+        /* Responsividade */
+        @media screen and (max-width: 768px) {
+            .photo-btn {
+                width: 80px;
+                font-size: 12px;
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <a href="index.html" style="display:inline-block; margin-bottom:20px; padding:10px 20px; background:#007BFF; color:#fff; text-decoration:none; font-weight:bold; border-radius:5px;">
+        ⬅ Back to Home
+      </a>
+      
+    <h2>Hockey Photo Tracker</h2>
+
+    <!-- Tabela principal de jogos -->
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Arena</th>
+                <th>Home Team</th>
+                <th>Visitor Team</th>
+            </tr>
+        </thead>
+        <tbody id="gameTable"></tbody>
+    </table>
+
+    <!-- Tabela de controle de fotos -->
+    <h3>Photo Status by Team</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Team</th>
+                <th>Team Photo</th>
+                <th>Player Action</th>
+                <th>Social Media</th>
+            </tr>
+        </thead>
+        <tbody id="teamStatusTable"></tbody>
+    </table>
+
+    <script>
+        const games = [
+            { date: "Apr 11, 2025", time: "1:00 PM", arena: "Pro Rink", home: "Wags Hockey", visitor: "Alcohooligans" },
+            { date: "Apr 11, 2025", time: "2:05 PM", arena: "Pro Rink", home: "St. George Old Lions", visitor: "RABC" },
+            { date: "Apr 11, 2025", time: "3:10 PM", arena: "Pro Rink", home: "Shit Shooters", visitor: "Orangemen" },
+            { date: "Apr 11, 2025", time: "4:15 PM", arena: "Pro Rink", home: "All Pucked Up 40", visitor: "FireKrakers 40" },
+            { date: "Apr 11, 2025", time: "5:20 PM", arena: "Pro Rink", home: "Wheat Kings", visitor: "Reapers" },
+
+            { date: "Apr 12, 2025", time: "9:00 AM", arena: "Pro Rink", home: "RABC", visitor: "All Pucked Up 40" },
+            { date: "Apr 12, 2025", time: "10:05 AM", arena: "Pro Rink", home: "FireKrakers 40", visitor: "Shit Shooters" },
+            { date: "Apr 12, 2025", time: "11:10 AM", arena: "Pro Rink", home: "Orangemen", visitor: "St. George Old Lions" },
+            { date: "Apr 12, 2025", time: "12:00 PM", arena: "Lightning Rink", home: "Alcohooligans", visitor: "Wheat Kings" },
+            { date: "Apr 12, 2025", time: "12:15 PM", arena: "Pro Rink", home: "Reapers", visitor: "Wags Hockey" },
+            { date: "Apr 12, 2025", time: "1:05 PM", arena: "Lightning Rink", home: "Shit Shooters", visitor: "RABC" },
+            { date: "Apr 12, 2025", time: "2:20 PM", arena: "Pro Rink", home: "St. George Old Lions", visitor: "FireKrakers 40" },
+            { date: "Apr 12, 2025", time: "3:10 PM", arena: "Lightning Rink", home: "All Pucked Up 40", visitor: "Orangemen" },
+            { date: "Apr 12, 2025", time: "3:25 PM", arena: "Pro Rink", home: "Alcohooligans", visitor: "Reapers" },
+            { date: "Apr 12, 2025", time: "4:15 PM", arena: "Lightning Rink", home: "Wags Hockey", visitor: "Wheat Kings" },
+
+        ];
+
+
+        let teamsSet = new Set(); // Para armazenar os times únicos
+
+        function loadGames() {
+            const table = document.getElementById("gameTable");
+            table.innerHTML = "";
+
+            games.forEach((game) => {
+                const row = table.insertRow();
+
+                row.insertCell(0).textContent = game.date;
+                row.insertCell(1).textContent = game.time;
+                row.insertCell(2).textContent = game.arena;
+
+                const homeCell = row.insertCell(3);
+                homeCell.innerHTML = createTeamSection(game.home, game.date);
+                teamsSet.add(game.home);
+
+                const visitorCell = row.insertCell(4);
+                visitorCell.innerHTML = createTeamSection(game.visitor, game.date);
+                teamsSet.add(game.visitor);
+            });
+
+            loadProgress();
+            loadTeamStatus();
+        }
+
+        function createTeamSection(team, date) {
+            return `
+                <div class="team-container">
+                    <strong>${team}</strong>
+                    <div class="btn-group">
+                        <button class="photo-btn btn-default" id="btn-team-${date}-${team}" onclick="togglePhoto('${date}', '${team}', 'team')">Team 📸</button>
+                        <button class="photo-btn btn-default" id="btn-action-${date}-${team}" onclick="togglePhoto('${date}', '${team}', 'action')">Action 🎯</button>
+                        <button class="photo-btn btn-default" id="btn-social-${date}-${team}" onclick="togglePhoto('${date}', '${team}', 'social')">Social 🌐</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function togglePhoto(date, team, type) {
+            const button = document.getElementById(`btn-${type}-${date}-${team}`);
+            let isActive = button.classList.contains(`btn-${type}`);
+
+            if (isActive) {
+                button.classList.remove(`btn-${type}`);
+                button.classList.add("btn-default");
+            } else {
+                button.classList.remove("btn-default");
+                button.classList.add(`btn-${type}`);
+            }
+
+            saveProgress();
+            loadTeamStatus();
+        }
+
+        function saveProgress() {
+            let progress = {};
+            games.forEach(game => {
+                ["home", "visitor"].forEach(teamType => {
+                    const team = game[teamType];
+                    const key = `${game.date}|${team}`;
+
+                    progress[key] = {
+                        team: document.getElementById(`btn-team-${game.date}-${team}`).classList.contains("btn-team"),
+                        action: document.getElementById(`btn-action-${game.date}-${team}`).classList.contains("btn-action"),
+                        social: document.getElementById(`btn-social-${game.date}-${team}`).classList.contains("btn-social")
+                    };
+                });
+            });
+
+            localStorage.setItem("photoProgress", JSON.stringify(progress));
+        }
+
+        function loadProgress() {
+            let savedProgress = JSON.parse(localStorage.getItem("photoProgress"));
+            if (savedProgress) {
+                Object.keys(savedProgress).forEach(key => {
+                    let [date, team] = key.split("|");
+                    Object.keys(savedProgress[key]).forEach(type => {
+                        let button = document.getElementById(`btn-${type}-${date}-${team}`);
+                        if (button) {
+                            button.classList.remove("btn-default", "btn-team", "btn-action", "btn-social");
+                            if (savedProgress[key][type]) {
+                                button.classList.add(`btn-${type}`);
+                            } else {
+                                button.classList.add("btn-default");
+                            }
+                        }
+                    });
+                });
+            }
+            loadTeamStatus();
+        }
+
+        function loadTeamStatus() {
+            const teamStatusTable = document.getElementById("teamStatusTable");
+            teamStatusTable.innerHTML = "";
+
+            let savedProgress = JSON.parse(localStorage.getItem("photoProgress")) || {};
+
+            teamsSet.forEach(team => {
+                let row = teamStatusTable.insertRow();
+                row.insertCell(0).textContent = team;
+
+                ["team", "action", "social"].forEach(type => {
+                    let cell = row.insertCell();
+                    let found = Object.keys(savedProgress).some(key => key.includes(team) && savedProgress[key][type]);
+
+                    cell.style.backgroundColor = found ? (type === "team" ? "#28a745" : type === "action" ? "#ffc107" : "#007bff") : "#ccc";
+                    cell.style.color = "white";
+                    cell.textContent = found ? "✔" : "✖";
+                });
+            });
+        }
+
+        window.onload = loadGames;
+    </script>
+
+</body>
+</html>
