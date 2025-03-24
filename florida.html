@@ -69,7 +69,7 @@
         ⬅ Back to Home
       </a>
       
-    <h2>Hockey Photo Tracker - Florida</h2>
+    <h2>Hockey Photo Tracker</h2>
 
     <!-- Tabela principal de jogos -->
     <table>
@@ -135,11 +135,11 @@
                 row.insertCell(2).textContent = game.arena;
 
                 const homeCell = row.insertCell(3);
-                homeCell.innerHTML = createTeamSection(game.home, game.date);
+                homeCell.innerHTML = createTeamSection(game.home, game.date, game.time);
                 teamsSet.add(game.home);
 
                 const visitorCell = row.insertCell(4);
-                visitorCell.innerHTML = createTeamSection(game.visitor, game.date);
+                visitorCell.innerHTML = createTeamSection(game.visitor, game.date, game.time);
                 teamsSet.add(game.visitor);
             });
 
@@ -147,46 +147,50 @@
             loadTeamStatus();
         }
 
-        function createTeamSection(team, date) {
+
+        function createTeamSection(team, date, time) {
+            const safeId = `${date}-${time}-${team}`.replace(/\s+/g, '_'); // substitui espaços por _
             return `
                 <div class="team-container">
                     <strong>${team}</strong>
                     <div class="btn-group">
-                        <button class="photo-btn btn-default" id="btn-team-${date}-${team}" onclick="togglePhoto('${date}', '${team}', 'team')">Team 📸</button>
-                        <button class="photo-btn btn-default" id="btn-action-${date}-${team}" onclick="togglePhoto('${date}', '${team}', 'action')">Action 🎯</button>
-                        <button class="photo-btn btn-default" id="btn-social-${date}-${team}" onclick="togglePhoto('${date}', '${team}', 'social')">Social 🌐</button>
+                        <button class="photo-btn btn-default" id="btn-team-${safeId}" onclick="togglePhoto('${date}', '${time}', '${team}', 'team')">Team 📸</button>
+                        <button class="photo-btn btn-default" id="btn-action-${safeId}" onclick="togglePhoto('${date}', '${time}', '${team}', 'action')">Action 🎯</button>
+                        <button class="photo-btn btn-default" id="btn-social-${safeId}" onclick="togglePhoto('${date}', '${time}', '${team}', 'social')">Social 🌐</button>
                     </div>
                 </div>
             `;
         }
 
-        function togglePhoto(date, team, type) {
-            const button = document.getElementById(`btn-${type}-${date}-${team}`);
-            let isActive = button.classList.contains(`btn-${type}`);
 
-            if (isActive) {
-                button.classList.remove(`btn-${type}`);
-                button.classList.add("btn-default");
-            } else {
-                button.classList.remove("btn-default");
-                button.classList.add(`btn-${type}`);
-            }
+
+        function togglePhoto(date, time, team, type) {
+            const safeId = `${date}-${time}-${team}`.replace(/\s+/g, '_');
+            const button = document.getElementById(`btn-${type}-${safeId}`);
+            if (!button) return;
+
+            const isActive = button.classList.contains(`btn-${type}`);
+            button.classList.toggle("btn-default", isActive);
+            button.classList.toggle(`btn-${type}`, !isActive);
 
             saveProgress();
             loadTeamStatus();
         }
 
+
         function saveProgress() {
             let progress = {};
+
             games.forEach(game => {
                 ["home", "visitor"].forEach(teamType => {
                     const team = game[teamType];
-                    const key = `${game.date}|${team}`;
+                    const key = `${game.date}|${game.time}|${team}`;
+                    const safeId = `${game.date}-${game.time}-${team}`.replace(/\s+/g, '_');
 
                     progress[key] = {
-                        team: document.getElementById(`btn-team-${game.date}-${team}`).classList.contains("btn-team"),
-                        action: document.getElementById(`btn-action-${game.date}-${team}`).classList.contains("btn-action"),
-                        social: document.getElementById(`btn-social-${game.date}-${team}`).classList.contains("btn-social")
+                        team: document.getElementById(`btn-team-${safeId}`).classList.contains("btn-team"),
+                        action: document.getElementById(`btn-action-${safeId}`).classList.contains("btn-action"),
+                        social: document.getElementById(`btn-social-${safeId}`).classList.contains("btn-social")
                     };
                 });
             });
@@ -194,26 +198,27 @@
             localStorage.setItem("photoProgress", JSON.stringify(progress));
         }
 
+
         function loadProgress() {
             let savedProgress = JSON.parse(localStorage.getItem("photoProgress"));
             if (savedProgress) {
                 Object.keys(savedProgress).forEach(key => {
-                    let [date, team] = key.split("|");
-                    Object.keys(savedProgress[key]).forEach(type => {
-                        let button = document.getElementById(`btn-${type}-${date}-${team}`);
+                    let [date, time, team] = key.split("|");
+                    const safeId = `${date}-${time}-${team}`.replace(/\s+/g, '_');
+
+                    ["team", "action", "social"].forEach(type => {
+                        const button = document.getElementById(`btn-${type}-${safeId}`);
                         if (button) {
                             button.classList.remove("btn-default", "btn-team", "btn-action", "btn-social");
-                            if (savedProgress[key][type]) {
-                                button.classList.add(`btn-${type}`);
-                            } else {
-                                button.classList.add("btn-default");
-                            }
+                            button.classList.add(savedProgress[key][type] ? `btn-${type}` : "btn-default");
                         }
                     });
                 });
             }
+
             loadTeamStatus();
         }
+
 
         function loadTeamStatus() {
             const teamStatusTable = document.getElementById("teamStatusTable");
